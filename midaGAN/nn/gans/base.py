@@ -9,7 +9,7 @@ from torch.nn.parallel import DistributedDataParallel
 from midaGAN.utils.metrics.train_metrics import TrainingMetrics
 from midaGAN.nn.utils import get_scheduler
 from midaGAN.utils import communication, io
-from midaGAN.utils.builders import build_D, build_G
+from midaGAN.utils.builders import build_D, build_G, build_C
 
 
 class BaseGAN(ABC):
@@ -49,6 +49,8 @@ class BaseGAN(ABC):
         for name in self.networks.keys():
             if name.startswith('G'):
                 self.networks[name] = build_G(self.conf, self.device)
+            elif name.startswith('C'):
+                self.networks[name] = build_C(self.conf, self.device)
             elif name.startswith('D'):
                 self.networks[name] = build_D(self.conf, self.device)
 
@@ -223,8 +225,7 @@ class BaseGAN(ABC):
                 checkpoint[name] = net.state_dict()
 
         # add optimizers to checkpoint
-        checkpoint['optimizer_G'] = self.optimizers['G'].state_dict()
-        checkpoint['optimizer_D'] = self.optimizers['D'].state_dict()
+        for key in self.optimizers: checkpoint[key]=self.optimizers[key].state_dict()
 
         # save apex mixed precision
         if self.conf[self.conf.mode].mixed_precision:

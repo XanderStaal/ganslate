@@ -1,0 +1,71 @@
+project_dir: null
+
+train:
+    output_dir: "./checkpoints/horse2zebra_swapCycleGan"
+    cuda: False
+    n_iters: 117700 # (1177 [dataset_size] * 100)
+    n_iters_decay: 117700
+    batch_size: 1
+    mixed_precision: False
+
+    logging:
+        freq: 500
+        wandb:
+            project: "horse2zebra"
+    
+    checkpointing:
+        freq: 5000
+
+    dataset: 
+        name: "ImageDataset"
+        root: "./projects/horse2zebra/datasets/train/"
+        num_workers: 0
+        image_channels: 3
+        preprocess: "resize"
+        load_size: 256
+        flip: True
+        
+    gan:  
+        name: "SwapCycleGAN"
+
+        compressor:
+            name: "ResDown2D"
+            n_residual_blocks: 5
+            in_channels: 3
+            out_channels: 3
+
+        generator:  
+            name: "ResUp2D"
+            n_residual_blocks: 5
+            in_channels: 3
+            out_channels: 3
+
+        discriminator:  
+            name: "PatchGAN2D"
+            n_layers: 3
+            in_channels: 3
+
+        optimizer:
+            lambda_AB: 10.0
+            lambda_BA: 10.0
+            lambda_identity: 10.0
+            proportion_ssim: 0
+            lr_D: 0.0002
+            lr_G: 0.0002
+    
+    metrics:
+        discriminator_evolution: True
+        ssim: True
+
+infer:
+    checkpointing:
+        load_iter: 1
+    dataset:
+        name: "ImageDataset"
+        root: "./projects/horse2zebra/datasets/test/"
+        num_workers: 0
+        image_channels: 3
+        preprocess: "resize"
+        load_size: 256
+        flip: False
+

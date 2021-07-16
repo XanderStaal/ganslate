@@ -45,10 +45,10 @@ class TrainingTracker(BaseTracker):
             return metrics
 
         def log_message():
-            lr_G, lr_D = learning_rates["lr_G"], learning_rates["lr_D"]
             message = '\n' + 20 * '-' + ' '
-            message += (f"(iter: {self.iter_idx} | comp: {self.t_comp:.3f}, "
-                        f"data: {self.t_data:.3f} | lr_G: {lr_G:.7f}, lr_D = {lr_D:.7f})")
+            message += (f"(iter: {self.iter_idx} | comp: {self.t_comp:.3f}, data: {self.t_data:.3f} | ")
+            for key in learning_rates : message += (key + f": {learning_rates[key]:.7f}, ")
+            if message[-2:]==", ": message = message[:-2]
             message += ' ' + 20 * '-' + '\n'
 
             for k, v in losses.items():

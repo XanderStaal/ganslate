@@ -46,8 +46,7 @@ class WandbTracker:
 
         # Learning rates
         if learning_rates:
-            log_dict['lr_G'] = learning_rates['lr_G']
-            log_dict['lr_D'] = learning_rates['lr_D']
+            for key in learning_rates: log_dict[key] = learning_rates[key]
 
         # Losses
         if losses:

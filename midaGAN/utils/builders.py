@@ -88,7 +88,7 @@ def build_D(conf, device):
 
 def build_network_by_role(role, conf, device):
     """Builds a discriminator or generator. TODO: document """
-    assert role in ['discriminator', 'generator']
+    assert role in ['discriminator', 'compressor', 'generator']
 
     name = conf.train.gan[role].name
     network_class = import_class_from_dirs_and_modules(name, IMPORT_LOCATIONS)

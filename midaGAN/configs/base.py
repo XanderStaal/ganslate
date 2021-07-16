@@ -37,7 +37,6 @@ class BaseGeneratorConfig:
     in_channels: int = MISSING
     out_channels: int = MISSING
 
-
 @dataclass
 class BaseGANConfig:
     """Base GAN config."""
@@ -50,6 +49,8 @@ class BaseGANConfig:
     generator: BaseGeneratorConfig = MISSING
     # Discriminator optional as it is not used in inference
     discriminator: Optional[BaseDiscriminatorConfig] = None
+    # Compressor optional as it is only used for the swapCycleGAN
+    compressor: Optional[BaseGeneratorConfig] = None
 
 
 ############################### Logging ########################################
