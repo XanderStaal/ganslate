@@ -53,7 +53,7 @@ RUN pip install pandas
 # Create runner for input and output
 USER root
 RUN mkdir /runner
-RUN mkdir /runner/midagan && chmod 777 /runner/midagan
+RUN mkdir /runner/ganslate && chmod 777 /runner/ganslate
 RUN mkdir /runner/data
 RUN mkdir /runner/output && chmod 777 /runner/output
 USER runner
