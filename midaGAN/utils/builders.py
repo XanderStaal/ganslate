@@ -77,6 +77,8 @@ def build_gan(conf):
     model = model_class(conf)
     return model
 
+def build_C(conf, device):
+    return build_network_by_role('compressor', conf, device)
 
 def build_G(conf, device):
     return build_network_by_role('generator', conf, device)
