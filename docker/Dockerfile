@@ -1,5 +1,7 @@
 ARG CUDA="10.2"
-ARG CUDNN="7"
+ARG CUDNN="8"
+ARG PYTHON="3.8.5"
+ARG PYTORCH="1.8"
 
 # TODO: conda installs its own version of cuda
 FROM nvidia/cuda:${CUDA}-cudnn${CUDNN}-devel-ubuntu18.04
@@ -11,7 +13,8 @@ ENV LD_LIBRARY_PATH /usr/local/nvidia/lib64
 RUN apt-get -qq update
 # libsm6 and libxext6 are needed for cv2
 RUN apt-get update && apt-get install -y libxext6 libsm6 libxrender1 build-essential sudo \
-    libgl1-mesa-glx git wget rsync tmux nano dcmtk fftw3-dev liblapacke-dev libpng-dev libopenblas-dev jq && \
+    libgl1-mesa-glx git wget rsync tmux nano dcmtk fftw3-dev liblapacke-dev libpng-dev \
+    libglib2.0-0 libopenblas-dev jq && \
   rm -rf /var/lib/apt/lists/*
 RUN ldconfig
 
@@ -19,44 +22,41 @@ RUN ldconfig
 
 
 RUN adduser --disabled-password --gecos '' runner
-# RUN adduser runner sudo
+RUN adduser runner sudo
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-ARG USER_ID
-ARG GROUP_ID
-RUN usermod -u ${USER_ID} runner
-RUN usermod -g ${GROUP_ID} runner
 USER runner
 
 
 WORKDIR /tmp
-RUN wget -q https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 RUN bash Miniconda3-latest-Linux-x86_64.sh -b
 
 ENV PATH "/home/runner/miniconda3/bin:$PATH:$CUDA_ROOT"
 
 # Setup python packages
 RUN conda update -n base conda -yq
-RUN conda install python=3.8
-RUN conda install numpy pyyaml mkl mkl-include setuptools cmake cffi typing boost
-RUN conda install pytorch torchvision cudatoolkit=10.2 -c pytorch
-RUN conda install scipy pandas scikit-learn scikit-image -yq
-RUN conda install cython tqdm jupyter sqlalchemy -yq
+RUN conda install python=${PYTHON}
+RUN conda install pip
+RUN conda install pytorch=${PYTORCH} torchvision cudatoolkit=${CUDA} -c pytorch
 
-RUN python -m pip install opencv-python simpleitk h5py -q
-RUN python -m pip install tb-nightly wandb -q
-RUN python -m pip install monai memcnn -q
-RUN python -m pip install omegaconf loguru -q
+RUN pip install loguru
+RUN pip install monai
+RUN pip install scikit-image
+RUN pip install opencv-python
+RUN pip install memcnn
+RUN pip install omegaconf
+RUN pip install tensorboard
+RUN pip install wandb
+RUN pip install pandas
 
-USER root
 
 # Create runner for input and output
-RUN mkdir /runner && chmod 777 /runner
-RUN mkdir /runner/ganslate && chmod 777 /runner/ganslate
-RUN mkdir /runner/datasets && chmod 777 /runner/datasets
+USER root
+RUN mkdir /runner
+RUN mkdir /runner/midagan && chmod 777 /runner/midagan
+RUN mkdir /runner/data
+RUN mkdir /runner/output && chmod 777 /runner/output
 USER runner
-
-# Copy files into the docker
-COPY [".", "/runner"]
 
 WORKDIR /runner
 
