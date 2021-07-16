@@ -14,7 +14,7 @@ class OptimizerConfig(configs.base.BaseOptimizerConfig):
     """SwapGAN Optimizer Config"""
     lambda_AB: float = 10.0
     lambda_BA: float = 10.0
-    lambda_identity: float = 10.0
+    lambda_identity: float = 1.0
     proportion_ssim: float = 0
 
 
@@ -92,8 +92,7 @@ class SwapCycleGAN(BaseGAN):
         """Calculate losses, gradients, and update network weights. 
         Called in every training iteration.
         """
-        compressors = [self.networks['D_A'], self.networks['D_B']]
-        generators = [self.networks['G_A'], self.networks['G_B']]
+
         discriminators = [self.networks['D_A'], self.networks['D_B']]
 
         self.forward()  # compute fake images and reconstruction images.
@@ -102,16 +101,13 @@ class SwapCycleGAN(BaseGAN):
         self.metrics.update(self.training_metrics.compute_metrics_G(self.visuals))
 
         # ------------------------ C,G_A/B ----------------------------------------------------------
-        self.set_requires_grad(compressors, True)
-        self.set_requires_grad(generators, True)
-        self.set_requires_grad(discriminators, False)
 
+        self.set_requires_grad(discriminators, False)
         self.optimizers['CG'].zero_grad(set_to_none=True)
         self.backward_G()  # calculate gradients for CG
         self.optimizers['CG'].step()  # update weights in CG
         # ------------------------ D_A/B ----------------------------------------------------------
-        self.set_requires_grad(compressors, False)
-        self.set_requires_grad(generators, False)
+
         self.set_requires_grad(discriminators, True)
         self.optimizers['D'].zero_grad(set_to_none=True)
         self.backward_D('D_B')  # calculate gradients for D_B
